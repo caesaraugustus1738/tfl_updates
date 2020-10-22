@@ -14,81 +14,45 @@ class NoUpdateException(Exception):
     pass
 
 
-def scrape(url='https://tfl.gov.uk/tube-dlr-overground/status/#'):
+def scrape_travel_data(url='https://tfl.gov.uk/tube-dlr-overground/status/#'):
     '''Scrape travel updates from TFL website.'''
-    _url = url
     _short_sum = 'short_sum'
     _good_service = 'Good service'
 
 
-    def _fetch_html(_url):
-        '''Get HTML response in byte form.'''
+    def _tfl_soup(url):
+        '''Return a parsed HTML object.'''
         try:
-            response = requests.get(_url, timeout=5)
+            html_res = requests.get(url, timeout=5)
         except requests.exceptions.ReadTimeout as e:
-            print('Below is the requests.exceptions.ReadTimeout error')
             print(e)
             return
 
-        bytes_ = response.content
-        return bytes_   
+        soup = bs(html_res.text, 'html.parser')
+
+        return soup  
         
 
-    def _read_html():
-        '''Convert byte response to html parse object.'''
-        html = _fetch_html(_url)
-        soup = bs(html, 'html.parser')
-        return soup
+    def _tube_status(url):
+        '''TFL updates from soup object.'''
+        tube_line_status = {}
+        soup = _tfl_soup(url)
+
+        # Get tube line names
+        link_tags = soup.find_all('li')
+
+        for link in link_tags:
+            if link.has_attr('aria-level'):
+                line = link.find(class_='service-name').text.strip()
+                summary = link.find(class_='disruption-summary').text.strip()
+                tube_line_status[line] = summary
+
+        return tube_line_status
+
+    return _tube_status(url)
 
 
-    def tube_updates():
-        '''Extract TFL updates for each tube.'''
-        soup = _read_html()
-        rainbow_list = soup.find(id='rainbow-list-tube-dlr-overground-tflrail-tram')
-        tags = rainbow_list.find_all(class_="rainbow-list-item")
-        
-        update_dict = {}
-
-        for i in tags:
-            line = str(i.find_all('span')[1])
-            update_dict[tag_strip(line)] = {}
-            
-            summ_class = i.find(class_='disruption-summary')
-
-            summ = tag_strip(str(summ_class.contents[1])).strip()
-            update_dict[tag_strip(line)][_short_sum] = summ
-
-        update_dict_stripped = _rm_good_service(update_dict)
-
-        return update_dict_stripped
-
-
-    def tag_strip(text):
-        '''Isolates text between first and second tag.'''
-        top_tag_index = text.find('>') + 1
-        tail_tag_index = text.find('<', top_tag_index)
-        strip_text = text[top_tag_index:tail_tag_index]
-        esc_text = unescape(strip_text)
-        return esc_text
-
-
-    def first_letter_cap(prose):
-        '''All words capitalize first letter.'''
-        new_prose = ''
-        for word in prose.split(' '):
-            new_prose += ' ' + word.capitalize()
-        return new_prose.strip()
-
-
-    def _rm_good_service(_dict):
-        for key in _dict.copy():
-            if _dict[key][_short_sum] == _good_service:
-                del _dict[key]
-        return _dict
-
-    return tube_updates()
-
-class Tweeter:
+class TwitterAccess:
     '''Post tweets to Twitter.'''
     def __init__(self):
         self._keys = secure_keys
@@ -111,10 +75,13 @@ class Tweeter:
         return api
 
 
-    def tweet(self, tweet_list):
+    def tweet(self, messages):
         '''Tweet.'''
-        for tweet in tweet_list:
-            self.api().update_status(tweet)
+        if type(messages) is str:
+            self.api().update_status(message)
+        else:
+            for m in message:
+                self.api().update_status(m)
 
 
 # Rename to TweetFormatter

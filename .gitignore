@@ -2,3 +2,6 @@ secure_keys.py
 sandbox/
 Pipfile.lock
 Pipfile
+scrapetweet_riz.py
+__pycache__/
+sandbox.py

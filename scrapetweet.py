@@ -14,7 +14,7 @@ class NoUpdateException(Exception):
     pass
 
 
-def scrape_travel_data(url='https://tfl.gov.uk/tube-dlr-overground/status/#'):
+def scrape_tfl_data(url='https://tfl.gov.uk/tube-dlr-overground/status/#'):
     '''Scrape travel updates from TFL website.'''
     _short_sum = 'short_sum'
     _good_service = 'Good service'
@@ -85,7 +85,7 @@ class TwitterAccess:
 
 
 # Rename to TweetFormatter
-class FormatTweet:
+class TweetFormatter:
     '''Format scraped data into tweets.
 
     Accepts a dict of dicts supplied by
@@ -95,11 +95,11 @@ class FormatTweet:
         self._footer = 'https://tfl.gov.uk/tube-dlr-overground/status/#'
         self._char_limit = 270 - len(self._header + self._footer) - 3
         self._line_cutoff = 50
-        self._good_service = 'Returned to good service.'
+        self._good_service = 'Good service'
         self._warning_emj = '⚠'
         self._tick_emj = '✅'
         self._short_sum = 'short_sum'
-        self.previous_scrape = {}
+        self.prev_update = {}
 
 
     def categories(self, scrape_data):
@@ -121,8 +121,8 @@ class FormatTweet:
         # Rename cats to alert > normal, alert > alert, normal > alert 
         categories = {
                 'normal': self._return_to_normal(self.previous_scrape, scrape_data),
-                'changes': self._update_change(self.previous_scrape, scrape_data),
-                'alerts': self._new_updates(self.previous_scrape, scrape_data)
+                'new_alert': self._new_updates(self.previous_scrape, scrape_data),
+                'alert_change': self._update_change(self.previous_scrape, scrape_data)
                 }
 
         # Format updates based on category
@@ -140,74 +140,85 @@ class FormatTweet:
         self.previous_scrape = scrape_data
 
 
-    def _rm_good_service(self):
-        '''Remove good service from previous tweet.
+    def categorise_alerts(self, upd, prev_upd=None):
+        '''Returns a dict dicts with categorise alerts.
 
-        Need to use a .copy() because
-        dict is being shrunk as we iterate.'''
-        for key in self.previous_scrape.copy():
-            if self.previous_scrape[key][self._short_sum] == self._good_service:
-                del self.previous_scrape[key]
+        Accepts up to two dicts. Compares
+        and groups updates. Passing one dict
+        checks for anything which is not a 
+        good service.'''
+        alerts =    {
+                        'fixed': {}, 
+                        'new': {},
+                    }
 
-
-    def _return_to_normal(self, prev_upd, new_upd):
-        '''Line returned to good service.'''
-        for key in prev_upd:
-            if key not in new_upd:
-                yield self.msg_formatter(key, self._good_service)
-
-
-    def _update_change(self, prev_upd, new_upd):
-        '''Line with existing issue has new issue.'''
-        for key in new_upd:
-                if key in prev_upd:
-                    if new_upd[key][self._short_sum] == prev_upd[key][self._short_sum]:
-                        pass
-                    else:
-                        yield self.msg_formatter(key, new_upd[key][self._short_sum])
-
-
-    def _new_updates(self, prev_upd, new_upd):
-        '''Good line has new issue.'''
-        for key in new_upd:
-            if key not in prev_upd:
-                yield self.msg_formatter(key, new_upd[key][self._short_sum])
-
-
-    def msg_trimmer(self, msg_list):
-        '''Trims string to cutoff.
-
-        Accepts a list of strs. Finds
-        appropriate place to trim str
-        and adds '...' suffix.'''
-
-        msg_list_cut = msg_list
-        for num, val in enumerate(msg_list):
-            if len(val) > self._line_cutoff:
-                f_index = val.find(' ', self._line_cutoff)
-                b_index = val.rfind(' ', 0, self._line_cutoff)
-                abs_diff_func = lambda list_val: abs(list_val - self._line_cutoff)
-                closest_val = min([f_index, b_index], key=abs_diff_func)
-                trimmed_msg = val[:closest_val].strip()
-                
-                if trimmed_msg[-1] not in ascii_letters:
-                    trimmed_msg = trimmed_msg[:-1]
-                msg_list_cut[num] = trimmed_msg + '...'
-
-        return msg_list_cut
-
-
-    def msg_formatter(self, *args, emoji=None):
-        '''Joins strs together with - dividers.
-
-        Optional emoji prefix.'''
-        msg = []
-        for i in args:
-            msg.append(i)
-        if emoji:
-            return emoji + ' ' + ' - '.join(msg)
+        if not prev_upd:
+            for key in upd:
+                if upd[key] != self._good_service:
+                    alerts['new'][key] = upd[key]
         else:
-            return ' - '.join(msg)
+            for key in upd:
+                # No change in status
+                if upd[key] in prev_upd[key]:
+                    pass
+                # Line resumes good service
+                elif upd[key] == 'Good service':
+                    alerts['fixed'][key] = upd[key]
+                else:
+                    alerts['new'][key] = upd[key]
+
+        return alerts
+
+    def format_alerts(self, alerts):
+        emoji_adder = lambda lst, dict_, emj: lst.append(self._nice_msg(dict_, emoji=emj))
+
+        alert_cats = []
+        for category in alerts:
+            if category == 'fixed':
+                emoji_adder(alert_cats, alerts[category], self._tick_emj)
+            elif category == 'new':
+                emoji_adder(alert_cats, alerts[category], self._warning_emj)
+
+        flatten_list = lambda lst: [item for sublist in lst for item in sublist]
+
+        alert_list = flatten_list(alert_cats)
+
+        return alert_list
+
+
+    # def msg_trimmer(self, msg_list):
+    #     '''Trims string to cutoff.
+
+    #     Accepts a list of strs. Finds
+    #     appropriate place to trim str
+    #     and adds '...' suffix.'''
+
+    #     msg_list_cut = msg_list
+    #     for num, val in enumerate(msg_list):
+    #         if len(val) > self._line_cutoff:
+    #             f_index = val.find(' ', self._line_cutoff)
+    #             b_index = val.rfind(' ', 0, self._line_cutoff)
+    #             abs_diff_func = lambda list_val: abs(list_val - self._line_cutoff)
+    #             closest_val = min([f_index, b_index], key=abs_diff_func)
+    #             trimmed_msg = val[:closest_val].strip()
+                
+    #             if trimmed_msg[-1] not in ascii_letters:
+    #                 trimmed_msg = trimmed_msg[:-1]
+    #             msg_list_cut[num] = trimmed_msg + '...'
+
+    #     return msg_list_cut
+
+
+    def _nice_msg(self, dict_, emoji=None):
+        '''Convert dict key/value pairs to strs.'''
+        nice_msg = []
+
+        for key in dict_:
+            nice_msg.append(key + ' - ' + dict_[key])
+            if emoji:
+                nice_msg[-1] = emoji + ' ' + nice_msg[-1]
+
+        return nice_msg
 
 
     def msg_grouper(self, msgs):

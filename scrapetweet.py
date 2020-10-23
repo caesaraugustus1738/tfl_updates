@@ -75,9 +75,9 @@ class TwitterAccess:
     def tweet(self, messages):
         '''Tweet.'''
         if type(messages) is str:
-            self.api().update_status(message)
+            self.api().update_status(messages)
         else:
-            for m in message:
+            for m in messages:
                 self.api().update_status(m)
 
 

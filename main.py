@@ -9,6 +9,7 @@ from pathlib import Path
 
 # Make log dir, if it doesn't exist
 cwd = Path(os.path.dirname(__file__))
+
 try:
 	os.mkdir(Path(cwd/'logs'))
 except FileExistsError:
@@ -57,6 +58,11 @@ def main():
 			
 			package = tf.format(scrape)
 			
+			if not package:
+				print('All lines currently good service. Waiting 5 min to check again.')
+				time.sleep(300)
+				continue
+
 			print('Tweets packaged!\n')
 		except st.NoUpdateException as e:
 			logger.debug('Nothing to update.')

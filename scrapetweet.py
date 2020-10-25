@@ -107,6 +107,10 @@ class TweetFormatter:
         '''
         alerts = self.categorise_alerts(scrape_data, self.prev_scrape)
         self.prev_scrape = scrape_data
+        if self.truly_empty(alerts):
+            print('''No updates. Either all lines good service, or no change since previous scrape.''')
+            return None
+
         alerts_formatted = self._format_alerts(alerts)
         tweet_groups = self._tweet_grouper(alerts_formatted)
         
@@ -127,7 +131,7 @@ class TweetFormatter:
                     }
 
         if not prev_upd:
-            print('No previous update')
+            print('First scrape of the session!')
             for key in upd:
                 if upd[key] != self._good_service:
                     alerts['new'][key] = upd[key]
@@ -141,6 +145,15 @@ class TweetFormatter:
                     alerts['new'][key] = upd[key]
 
         return alerts
+
+
+    def truly_empty(self, dict_of_dicts):
+        '''Check if dict of dicts is fully empty.
+        '''
+        for key in dict_of_dicts:
+            if len(dict_of_dicts[key]):
+                return False
+        return True
 
 
     def _format_alerts(self, alerts):

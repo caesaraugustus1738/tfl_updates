@@ -25,7 +25,6 @@ logging.basicConfig(filename=Path(cwd/'logs'/f'tfl_update_{now_time}.log'),
 logger = logging.getLogger()
 logger.debug('Starting program')
 
-# -----------------------------------------------------------------
 
 def main():
 	tf = st.TweetFormatter()
@@ -46,26 +45,25 @@ def main():
 			time.sleep(5)
 			continue
 
-		try:
-			logger.debug('Pack tweets.')
-			package = tf.format(scrape)
+		logger.debug('Pack tweets.')
+		package = tf.format(scrape)
 			
-			if not package:
-				logger.debug('No issues to report. Check again in 5 min.')
-				time.sleep(300)
-				continue
+		if not package:
+			logger.debug('No issues to report. Check again in 5 min.')
+			time.sleep(300)
+		
+		else:
+			try:
+				logger.debug('Tweet.')
+				st.TwitterAccess().tweet(package)
 
-		try:
-			logger.debug('Tweet.')
-			st.TwitterAccess().tweet(package)
+			except tweepy.error.TweepError as e:
+				logger.debug('TweepError - probably a duplicate tweet.')
+				print(traceback.format_exc())
+				pass
 
-		except tweepy.error.TweepError as e:
-			logger.debug('TweepError - probably a duplicate tweet.')
-			print(traceback.format_exc())
-			pass
-
-		logger.debug('Waiting 5 min until next scrape...')
-		time.sleep(300)
+			logger.debug('Waiting 5 min until next scrape...')
+			time.sleep(300)
 
 
 if __name__ == '__main__':

@@ -6,3 +6,4 @@ scrapetweet_riz.py
 __pycache__/
 sandbox.py
 logs/
+sandbox/

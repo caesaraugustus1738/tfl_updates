@@ -1,4 +1,4 @@
 # tfl_twitter_updates
-Tweets latest tube updates. Currently hosted by AWS.
+TfL tube updates, accurate to five minutes. Currently hosted by AWS.
 
 https://twitter.com/caesara47709326

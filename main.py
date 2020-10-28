@@ -28,11 +28,9 @@ logger.debug('Starting program')
 
 def main():
 	while True:
-
 		try:
 			logger.debug('Scrape.')
 			scrape = scrape_tfl_data.scrape_tfl_data()
-			print(scrape)
 		
 		except requests.exceptions.ConnectTimeout as e:
 			logger.debug('Connection timed out.')
@@ -48,17 +46,21 @@ def main():
 		package = TweetFormatter.TweetFormatter().format(scrape)
 			
 		if not package:
-			logger.debug('No issues to report. Check again in 5 min.')
+			logger.debug('''
+				No update needed. All lines good 
+				service or no change since previous scrape. 
+				Check again in 5 min.
+				''')
 			time.sleep(300)
 		
 		else:
 			try:
-				logger.debug('Tweet.')
+				logger.debug('Send tweet.')
 				TwitterAccess.TwitterAccess().tweet(package)
 
 			except tweepy.error.TweepError as e:
-				logger.debug('TweepError - probably a duplicate tweet.')
-				print(traceback.format_exc())
+				logger.debug(traceback.format_exc())
+				print('TweepError: ',e)
 				pass
 
 			logger.debug('Waiting 5 min until next scrape...')

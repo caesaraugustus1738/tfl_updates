@@ -19,9 +19,11 @@ except FileExistsError:
 now_time = (time.strftime('%Y_%m_%d_%H:%M:%S'))
 
 LOG_FORMAT = '%(levelname)s %(asctime)s - %(message)s'
-logging.basicConfig(filename=Path(cwd/'logs'/f'tfl_update_{now_time}.log'),
-					level=logging.DEBUG,
-					format=LOG_FORMAT)
+logging.basicConfig(
+	filename=Path(cwd/'logs'/f'tfl_update_{now_time}.log'),
+	level=logging.DEBUG,
+	format=LOG_FORMAT
+					)
 logger = logging.getLogger()
 logger.debug('Starting program')
 

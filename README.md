@@ -1,6 +1,6 @@
 # TfL Twitter Updates
 
-[ https://twitter.com/caesara47709326](https://twitter.com/caesara47709326)
+[ Twitter bot](https://twitter.com/caesara47709326)
 
 ### Summary
 TfL tube updates, accurate to five minutes. Currently hosted by AWS. I created this project to learn some basic webscraping and to understand the Twitter API.

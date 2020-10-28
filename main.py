@@ -23,7 +23,7 @@ logging.basicConfig(
 	filename=Path(cwd/'logs'/f'tfl_update_{now_time}.log'),
 	level=logging.DEBUG,
 	format=LOG_FORMAT
-					)
+	)
 logger = logging.getLogger()
 logger.debug('Starting program')
 

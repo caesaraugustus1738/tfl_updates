@@ -1,3 +1,4 @@
+send_to_aws_test.sh
 secure_keys.py
 sandbox/
 #Pipfile.lock

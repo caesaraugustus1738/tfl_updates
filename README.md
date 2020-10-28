@@ -1,16 +1,29 @@
+<img src="https://github.com/caesaraugustus1738/tfl_updates/blob/main/tfl_updates_twitter_banner.png">
+
 # TfL Twitter Updates
 
-[ Twitter bot](https://twitter.com/caesara47709326)
+[ https://twitter.com/caesara47709326](https://twitter.com/caesara47709326)
 
-### Summary
+### Intro
 TfL tube updates, accurate to five minutes. Currently hosted by AWS. I created this project to learn some basic webscraping and to understand the Twitter API.
 
-### Key takeaways
-* API wrappers are powerful. Tweepy made it very easy to interface with Twitter. I did not have to deep dive into the Twitter API documentation. I need exposure to a raw API to deepen my knowledge. Tweepy made it too easy!
-* Basic BASH learnt to use GIT, SSH to AWS, SCP to AWS.
-* I separated each class into its own module at the suggestion of a friend. This would have saved time and simplified the process if I did this initially.
-* I renamed functions and classes multiple times as I progressed. It's difficult to devise good names for objects.
-* I had to revise my psuedo code as I programmed.
+### Process
+
+1. Scrape TfL data into a dictionary of dictionaries.
+1. Peform formatting on data.
+1. Post the data on Twitter using the Twitter API.
+
+### Takeaways
+* API wrappers are powerful. 
+>Tweepy made it very easy to interface with Twitter. I did not have to deep dive into the Twitter API documentation. I need exposure to a raw API to deepen my knowledge. Tweepy made it too easy!
+* Fundamental skills learnt.
+>* GIT (init, status, add, commit, push)
+> *SSH (RSA key pairs)
+> *AWS (create instance)
+> *SCP (send files to AWS Ubuntu instance)
+* One class per module.
+* Devise good names for objects.
+
 
 ### Libraries used
 * Beautiful Soup

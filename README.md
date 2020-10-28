@@ -5,7 +5,7 @@
 [ https://twitter.com/caesara47709326](https://twitter.com/caesara47709326)
 
 ### Intro
-TfL tube updates, accurate to five minutes. Currently hosted by AWS. I created this project to learn some basic webscraping and to understand the Twitter API.
+TfL tube update bot, accurate to five minutes. Currently hosted by AWS. I created this project to learn some basic webscraping and to gain understanding of web APIs.
 
 ### Process
 

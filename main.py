@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
+
 import time
-import scrapetweet as st
+from scrapetweet import TweetFormatter, TwitterAccess, scrape_tfl_data
 import requests
 import traceback
 import tweepy
@@ -7,7 +9,6 @@ import logging
 import os
 from pathlib import Path
 
-# Make log dir, if it doesn't exist
 cwd = Path(os.path.dirname(__file__))
 
 try:
@@ -15,7 +16,6 @@ try:
 except FileExistsError:
 	pass
 
-# Create and configure logger
 now_time = (time.strftime('%Y_%m_%d_%H:%M:%S'))
 
 LOG_FORMAT = '%(levelname)s %(asctime)s - %(message)s'
@@ -27,26 +27,25 @@ logger.debug('Starting program')
 
 
 def main():
-	tf = st.TweetFormatter()
-
 	while True:
 
 		try:
 			logger.debug('Scrape.')
-			scrape = st.scrape_tfl_data()
+			scrape = scrape_tfl_data.scrape_tfl_data()
+			print(scrape)
 		
 		except requests.exceptions.ConnectTimeout as e:
 			logger.debug('Connection timed out.')
 			time.sleep(5)
 			continue
 		
-		except:
-			logger.debug('Other scrape error.')
-			time.sleep(5)
-			continue
+		# except:
+		# 	logger.debug('Other scrape error.')
+		# 	time.sleep(5)
+		# 	continue
 
 		logger.debug('Pack tweets.')
-		package = tf.format(scrape)
+		package = TweetFormatter.TweetFormatter().format(scrape)
 			
 		if not package:
 			logger.debug('No issues to report. Check again in 5 min.')
@@ -55,7 +54,7 @@ def main():
 		else:
 			try:
 				logger.debug('Tweet.')
-				st.TwitterAccess().tweet(package)
+				TwitterAccess.TwitterAccess().tweet(package)
 
 			except tweepy.error.TweepError as e:
 				logger.debug('TweepError - probably a duplicate tweet.')

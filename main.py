@@ -39,10 +39,10 @@ def main():
 			time.sleep(5)
 			continue
 		
-		# except:
-		# 	logger.debug('Other scrape error.')
-		# 	time.sleep(5)
-		# 	continue
+		except:
+			logger.debug('Unknown scrape error.')
+			time.sleep(5)
+			continue
 
 		logger.debug('Pack tweets.')
 		package = TweetFormatter.TweetFormatter().format(scrape)

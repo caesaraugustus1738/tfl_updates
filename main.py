@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import time
-from scrapetweet import tweet_formatter, twitter_access, scrape
+from scrapetweet import TweetFormatter, TwitterAccess, scrape_tfl_data
 import requests
 import traceback
 import tweepy
@@ -29,26 +29,23 @@ logger.debug('Starting program')
 
 
 def main():
-
-	tf = tweet_formatter.TweetFormatter()
-
 	while True:
 		try:
 			logger.debug('Scrape.')
-			scrape_data = scrape.scrape_tfl_data()
+			scrape = scrape_tfl_data.scrape_tfl_data()
 		
 		except requests.exceptions.ConnectTimeout as e:
 			logger.debug('Connection timed out.')
 			time.sleep(5)
 			continue
 		
-		# except:
-		# 	logger.debug('Unknown scrape error.')
-		# 	time.sleep(5)
-		# 	continue
+		except:
+			logger.debug('Unknown scrape error.')
+			time.sleep(5)
+			continue
 
 		logger.debug('Pack tweets.')
-		package = tf.format(scrape_data)
+		package = TweetFormatter.TweetFormatter().format(scrape)
 			
 		if not package:
 			logger.debug('''
@@ -61,7 +58,7 @@ def main():
 		else:
 			try:
 				logger.debug('Send tweet.')
-				twitter_access.TwitterAccess().tweet(package)
+				TwitterAccess.TwitterAccess().tweet(package)
 
 			except tweepy.error.TweepError as e:
 				logger.debug(traceback.format_exc())

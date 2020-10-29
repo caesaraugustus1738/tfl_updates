@@ -29,7 +29,7 @@ class TweetFormatter:
         alerts = self.categorise_alerts(scrape_data, self.prev_scrape)
         self.prev_scrape = scrape_data
         if utils.truly_empty(alerts):
-            print('''No updates. Either all lines good service, or no change since previous scrape.''')
+            print('No update needed. All lines good service or no change since previous scrape.')
             return None
 
         alerts_formatted = self._format_alerts(alerts)

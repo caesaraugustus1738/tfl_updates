@@ -35,7 +35,7 @@ def main():
 	while True:
 		try:
 			logger.debug('Scrape.')
-			scrape = scrape_tfl_data.scrape_tfl_data()
+			scrape_data = scrape.scrape_tfl_data()
 		
 		except requests.exceptions.ConnectTimeout as e:
 			logger.debug('Connection timed out.')
@@ -48,7 +48,7 @@ def main():
 			continue
 
 		logger.debug('Pack tweets.')
-		package = tf.format(scrape)
+		package = tf.format(scrape_data)
 			
 		if not package:
 			logger.debug('''
@@ -61,7 +61,7 @@ def main():
 		else:
 			try:
 				logger.debug('Send tweet.')
-				TwitterAccess.TwitterAccess().tweet(package)
+				twitter_access.TwitterAccess().tweet(package)
 
 			except tweepy.error.TweepError as e:
 				logger.debug(traceback.format_exc())

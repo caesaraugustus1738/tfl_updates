@@ -43,4 +43,4 @@ class TwitterAccess:
             self._api().update_status(messages[0])
             tweet_id = self._get_latest_tweet_id()
             for msg in messages[1:]:
-                self._api().update_status(self.account + msg, tweet_id)
+                self._api().update_status(self._account + msg, tweet_id)

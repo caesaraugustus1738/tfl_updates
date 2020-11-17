@@ -39,11 +39,13 @@ def main():
 		
 		except requests.exceptions.ConnectTimeout as e:
 			logger.debug('Connection timed out.')
+			logger.debug(e)
 			time.sleep(5)
 			continue
 		
-		except:
-			logger.debug('Unknown scrape error.')
+		except AttributeError as e:
+			logger.debug('HTML request timed out.')
+			logger.debug(e)
 			time.sleep(5)
 			continue
 
